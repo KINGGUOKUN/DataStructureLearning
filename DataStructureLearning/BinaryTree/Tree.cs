@@ -106,18 +106,12 @@ namespace DataStructureLearning.BinaryTree
                     if (currentNode.Children.Any())
                     {
                         currentNode.Data.LeavesCount = currentNode.Children.Sum(x => x.LeavesCount);
-                        if (branchCompute != null)
-                        {
-                            branchCompute(currentNode.Data, currentNode.Children);
-                        }
+                        branchCompute?.Invoke(currentNode.Data, currentNode.Children);
                     }
                     else
                     {
                         currentNode.Data.LeavesCount = 1;
-                        if (leafCompute != null)
-                        {
-                            leafCompute(currentNode.Data);
-                        }
+                        leafCompute?.Invoke(currentNode.Data);
                     }
                     stackParentNodes.Pop();
                 }
