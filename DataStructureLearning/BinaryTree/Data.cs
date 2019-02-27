@@ -7,5 +7,7 @@ namespace DataStructureLearning.BinaryTree
     public class Data
     {
         public int LeavesCount { get; set; }
+
+        public bool IsLeaf { get; set; }
     }
 }

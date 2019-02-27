@@ -135,7 +135,7 @@ namespace DataStructureLearning.BinaryTree
         /// <typeparam name="T"></typeparam>
         /// <param name="node"></param>
         /// <param name="branchCompute"></param>
-        public static void ComputeParent<T>(TreeNode<T> node, Action<T, List<T>> branchCompute)
+        public static void ComputeParent<T>(TreeNode<T> node, Action<T> leafCompute, Action<T, List<T>> branchCompute)
             where T : Data
         {
             if (node == null)
@@ -144,12 +144,25 @@ namespace DataStructureLearning.BinaryTree
             }
 
             TreeNode<T> currentNode = node;
+
+            if (node.Children.Any())
+            {
+                currentNode.Data.LeavesCount = currentNode.Children.Sum(x => x.LeavesCount);
+                branchCompute?.Invoke(currentNode.Data, currentNode.Children);
+            }
+            else
+            {
+                currentNode.Data.LeavesCount = 1;
+                currentNode.Data.IsLeaf = true;
+                leafCompute?.Invoke(currentNode.Data);
+            }
+
             while (currentNode != null)
             {
                 var parentNode = currentNode.Parent;
                 if (parentNode != null && parentNode.Left == currentNode)
                 {
-                    branchCompute(parentNode.Data, parentNode.Children);
+                    branchCompute?.Invoke(parentNode.Data, parentNode.Children);
                 }
 
                 currentNode = parentNode;
@@ -256,6 +269,49 @@ namespace DataStructureLearning.BinaryTree
             }
 
             return root;
+        }
+
+        /// <summary>
+        /// 后续遍历二叉树，对节点进行nodeAction操作
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="root"></param>
+        /// <param name="nodeAction"></param>
+        public static void Traversal<T>(TreeNode<T> root, Action<TreeNode<T>> nodeAction)
+            where T : Data
+        {
+            if (root == null)
+            {
+                return;
+            }
+
+            TreeNode<T> currentNode = null,
+                preNode = null;
+            Stack<TreeNode<T>> stackParentNodes = new Stack<TreeNode<T>>();
+            stackParentNodes.Push(root);
+
+            while (stackParentNodes.Any())
+            {
+                currentNode = stackParentNodes.Peek();
+                if ((currentNode.Left == null && currentNode.Right == null)
+                    || (preNode != null && (preNode == currentNode.Left || preNode == currentNode.Right)))
+                {
+                    nodeAction(currentNode);
+                    preNode = currentNode;
+                    stackParentNodes.Pop();
+                }
+                else
+                {
+                    if (currentNode.Right != null)
+                    {
+                        stackParentNodes.Push(currentNode.Right);
+                    }
+                    if (currentNode.Left != null)
+                    {
+                        stackParentNodes.Push(currentNode.Left);
+                    }
+                }
+            }
         }
     }
 }
